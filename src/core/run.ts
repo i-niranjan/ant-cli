@@ -112,6 +112,8 @@ export async function runAgent(options: RunOptions): Promise<FinalResult> {
     unpricedRequests: 0,
     inputTokens: 0,
     outputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
     costUsd: 0,
   };
   let toolCalls = 0;
@@ -161,6 +163,8 @@ export async function runAgent(options: RunOptions): Promise<FinalResult> {
       if (response.usage) {
         usage.inputTokens += response.usage.inputTokens;
         usage.outputTokens += response.usage.outputTokens;
+        usage.cacheReadTokens += response.usage.cacheReadTokens ?? 0;
+        usage.cacheWriteTokens += response.usage.cacheWriteTokens ?? 0;
       } else {
         usage.unreportedRequests++;
       }

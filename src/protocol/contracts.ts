@@ -74,6 +74,8 @@ export const UsageTotals = z.strictObject({
   unpricedRequests: count,
   inputTokens: count,
   outputTokens: count,
+  cacheReadTokens: count,
+  cacheWriteTokens: count,
   costUsd: z.number().nonnegative(),
 });
 export type UsageTotals = z.infer<typeof UsageTotals>;

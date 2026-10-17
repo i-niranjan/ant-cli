@@ -1,9 +1,10 @@
 # Ant Agent
 
-Early slice of the Ant Swarm coding harness. `demo` replays a scripted
-model/tool exchange through the real agent loop. The `run` command only prints
-the task and resolves its repository path. Nothing calls a real model, modifies
-files, or verifies that the repository path exists yet.
+Early slice of the Ant Swarm coding harness. `demo` runs an add_numbers
+model/tool exchange through the real agent loop, with a scripted model by
+default or a real one via `--model`. The `run` command only prints the task and
+resolves its repository path. Nothing modifies files or verifies that the
+repository path exists yet.
 
 Develop in Linux, Ubuntu/WSL2, or macOS with Node 22.22.0 and pnpm 12.11.2.
 Foundation checks pass on macOS; Linux CI is the authority. Native Windows is
@@ -34,6 +35,20 @@ node dist/cli.js demo
 node dist/cli.js demo --jsonl
 ```
 
+To use a real model, put the key in a git-ignored `.env` file. Only this
+variable is read; an `ANTHROPIC_API_KEY` meant for other tools is ignored:
+
+```bash
+echo 'ANT_AGENT_ANTHROPIC_API_KEY=sk-ant-...' >> .env && chmod 600 .env
+node --env-file=.env dist/cli.js demo --model anthropic/claude-haiku-5-5
+pnpm smoke:anthropic   # builds, then loads .env if present
+```
+
+The paid smoke test checks a real tool round-trip, abort, and invalid-key
+handling. A git-ignored ledger (`.ant-agent/smoke-spend.json`) caps total smoke
+spend at $1 and refuses runs that could exceed it. `pnpm check` and CI never
+call a paid API.
+
 Commander handles commands, options, missing arguments, help, and version output.
 TypeScript checks and compiles the source. tsx runs it during development.
 Compiled output goes to dist/. The terminal interface is src/cli.ts; agent
@@ -42,8 +57,9 @@ logic does not read stdin or print:
 - `src/protocol/contracts.ts`: versioned Zod contracts (events, messages,
   tool calls/results, usage, final result). Records with another
   `schemaVersion` are rejected.
-- `src/model/`: the `ModelClient` stream interface and `ScriptedModel`, a
-  deterministic fake that plays back one script per request.
+- `src/model/`: the `ModelClient` stream interface, `ScriptedModel` (a
+  deterministic fake that plays back one script per request), and
+  `PiModelClient` in `pi.ts`, the only module that imports Pi.
 - `src/tools/`: `defineTool` generates each tool's JSON Schema from its Zod
   arguments; `add_numbers` is a harmless fixture.
 - `src/core/run.ts`: `runAgent` streams a response, executes only complete and
@@ -76,6 +92,7 @@ those changes before retrying. Commit from a WSL or macOS terminal with Node/pnp
 - [Harness ownership and model transport](docs/adr/0001-harness-ownership.md)
 - [Execution trust, supported hosts, snapshot and apply](docs/adr/0002-execution-trust-boundary.md)
 - [Tooling, tests, and checkpoints](docs/adr/0003-foundation-tooling.md)
+- [First real model adapter](docs/adr/0004-first-model-adapter.md)
 
-The harness does not execute repository commands or call a real model yet.
-The next story, CH-003, adds one real model adapter behind `ModelClient`.
+The harness does not execute repository commands yet. The next story, CH-004,
+defines independent starter evaluations.

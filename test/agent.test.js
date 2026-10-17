@@ -107,6 +107,8 @@ test("scripted model streams text, completes a tool round-trip, and ends once", 
     unpricedRequests: 2,
     inputTokens: 30,
     outputTokens: 9,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
     costUsd: 0,
   });
   assertSingleTerminal(events, result);
@@ -295,6 +297,8 @@ test("missing usage is reported as unknown, not zero", async () => {
     unpricedRequests: 1,
     inputTokens: 0,
     outputTokens: 0,
+    cacheReadTokens: 0,
+    cacheWriteTokens: 0,
     costUsd: 0,
   });
   const completed = events.find((e) => e.type === "model_response_completed");

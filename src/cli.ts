@@ -77,7 +77,7 @@ function describeEvent(event: Event): string {
           ? `cost unknown for ${usage.unpricedRequests} of ${usage.modelRequests} requests`
           : `$${usage.costUsd.toFixed(6)}`;
       const outcome = reason ? `${state} (${reason})` : state;
-      return `${prefix}  ${outcome}: "${text}" (${toolCalls} tool call, ${usage.modelRequests} model requests, ${usage.inputTokens}/${usage.outputTokens} tokens in/out, ${cost})`;
+      return `${prefix}  ${outcome}: "${text}" (${toolCalls} tool call, ${usage.modelRequests} model requests, ${usage.inputTokens} in + ${usage.cacheReadTokens} cached / ${usage.outputTokens} out tokens, ${cost})`;
     }
     default:
       return `${prefix}  ${JSON.stringify(event.payload)}`;

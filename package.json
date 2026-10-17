@@ -13,7 +13,7 @@
     "test": "pnpm build && node --test test/*.test.js",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "preflight": "bash scripts/preflight.sh",
-    "smoke:anthropic": "pnpm build && node scripts/smoke-anthropic.mjs"
+    "smoke:anthropic": "pnpm build && node --env-file-if-exists=.env scripts/smoke-anthropic.mjs"
   },
   "keywords": [],
   "author": "",

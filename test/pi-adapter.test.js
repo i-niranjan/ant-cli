@@ -56,7 +56,12 @@ const start = (input) => ({
     content: [],
     stop_reason: null,
     stop_sequence: null,
-    usage: { input_tokens: input, output_tokens: 1 },
+    usage: {
+      input_tokens: input,
+      output_tokens: 1,
+      cache_read_input_tokens: 100,
+      cache_creation_input_tokens: 0,
+    },
   },
 });
 const block = (index, content_block) => ({
@@ -154,10 +159,10 @@ test("adapter completes a tool round-trip with usage, cost, and stop reasons", a
   assert.equal(result.usage.outputTokens, 38);
   assert.equal(result.usage.unreportedRequests, 0);
   assert.equal(result.usage.unpricedRequests, 0);
-  // Haiku 5.5: $0.10 input, $0.50 output per million tokens.
-  assert.ok(
-    Math.abs(result.usage.costUsd - (900 * 0.1 + 38 * 0.5) / 1e6) < 1e-12,
-  );
+  assert.equal(result.usage.cacheReadTokens, 200);
+  // Haiku 5.5: $0.10 input, $0.50 output, $0.01 cache read per million tokens.
+  const expected = (900 * 0.1 + 38 * 0.5 + 200 * 0.01) / 1e6;
+  assert.ok(Math.abs(result.usage.costUsd - expected) < 1e-12);
 
   const stops = events
     .filter((e) => e.type === "model_response_completed")
