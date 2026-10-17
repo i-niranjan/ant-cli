@@ -62,3 +62,20 @@ test("missing task, missing option value, and unknown command fail explicitly", 
     assert.equal(result.stdout, "");
   }
 });
+
+test("demo replays the scripted exchange and prints valid events", () => {
+  const readable = run(["demo"]);
+  assert.equal(readable.status, 0);
+  assert.match(readable.stdout, /tool_result .*"content":"5"/);
+  assert.match(readable.stdout, /run_finished {2}answered: "2 \+ 3 = 5\."/);
+
+  const jsonl = run(["demo", "--jsonl"]);
+  assert.equal(jsonl.status, 0);
+  const events = jsonl.stdout
+    .trim()
+    .split("\n")
+    .map((line) => JSON.parse(line));
+  assert.equal(events[0].type, "run_started");
+  assert.equal(events.at(-1).type, "run_finished");
+  assert.equal(events.at(-1).payload.result.state, "answered");
+});

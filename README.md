@@ -1,8 +1,9 @@
 # Ant Agent
 
-First CLI slice for the Ant Swarm coding harness. The run command currently
-prints the task and resolves its repository path. It does not call a model,
-modify files, or verify that the repository path exists yet.
+Early slice of the Ant Swarm coding harness. `demo` replays a scripted
+model/tool exchange through the real agent loop. The `run` command only prints
+the task and resolves its repository path. Nothing calls a real model, modifies
+files, or verifies that the repository path exists yet.
 
 Develop in Linux, Ubuntu/WSL2, or macOS with Node 22.22.0 and pnpm 12.11.2.
 Foundation checks pass on macOS; Linux CI is the authority. Native Windows is
@@ -29,12 +30,24 @@ pnpm dev --help
 pnpm dev run "explain this repository" --repo .
 pnpm build
 node dist/cli.js run "hello" --repo .
+node dist/cli.js demo
+node dist/cli.js demo --jsonl
 ```
 
 Commander handles commands, options, missing arguments, help, and version output.
 TypeScript checks and compiles the source. tsx runs it during development.
-The source is in src/cli.ts; compiled output goes to dist/cli.js.
-Agent logic will be separate from the terminal interface when introduced.
+Compiled output goes to dist/. The terminal interface is src/cli.ts; agent
+logic does not read stdin or print:
+
+- `src/protocol/contracts.ts`: versioned Zod contracts (events, messages,
+  tool calls/results, usage, final result). Records with another
+  `schemaVersion` are rejected.
+- `src/model/`: the `ModelClient` stream interface and `ScriptedModel`, a
+  deterministic fake that plays back one script per request.
+- `src/tools/`: `defineTool` generates each tool's JSON Schema from its Zod
+  arguments; `add_numbers` is a harmless fixture.
+- `src/core/run.ts`: `runAgent` streams a response, executes only complete and
+  valid tool calls sequentially, and ends with exactly one terminal result.
 
 ## How to commit
 
@@ -64,5 +77,5 @@ those changes before retrying. Commit from a WSL or macOS terminal with Node/pnp
 - [Execution trust, supported hosts, snapshot and apply](docs/adr/0002-execution-trust-boundary.md)
 - [Tooling, tests, and checkpoints](docs/adr/0003-foundation-tooling.md)
 
-The foundation does not execute repository commands or call a model yet.
-The next story, CH-002, adds a deterministic fake model/tool exchange.
+The harness does not execute repository commands or call a real model yet.
+The next story, CH-003, adds one real model adapter behind `ModelClient`.
