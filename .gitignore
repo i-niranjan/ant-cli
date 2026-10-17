@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+
+# Local credentials and generated agent state
+.ant-agent/
+sessions/
+artifacts/
+*.pem
+*.key

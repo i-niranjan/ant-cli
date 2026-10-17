@@ -1,0 +1,36 @@
+{
+  "name": "ant-agent",
+  "version": "1.0.0",
+  "description": "Coding agent CLI for Ant Swarm",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/cli.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky",
+    "lint": "biome check --error-on-warnings .",
+    "lint:fix": "biome check --write .",
+    "test": "pnpm build && node --test test/*.test.js",
+    "check": "pnpm lint && pnpm typecheck && pnpm test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@12.11.2",
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
+    "@types/node": "22.20.5",
+    "husky": "9.1.7",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2"
+  },
+  "dependencies": {
+    "commander": "15.0.0"
+  },
+  "private": true,
+  "engines": {
+    "node": ">=22.22.0 <23"
+  }
+}

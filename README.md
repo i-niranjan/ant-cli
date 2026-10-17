@@ -1,0 +1,63 @@
+# Ant Agent
+
+First CLI slice for the Ant Swarm coding harness. The run command currently
+prints the task and resolves its repository path. It does not call a model,
+modify files, or verify that the repository path exists yet.
+
+Develop in Linux or Ubuntu/WSL2 with Node 22.22.0 and pnpm 12.11.2.
+Native Windows and macOS support have not been verified.
+
+From a checkout, activate the pinned tools and install dependencies:
+
+```bash
+nvm install
+nvm use
+npm install --global pnpm@12.11.2
+pnpm install --frozen-lockfile
+pnpm check
+```
+
+`pnpm install` also installs the Husky Git hooks. `pnpm check` runs Biome lint,
+TypeScript checking, a build, and Node's CLI smoke tests. CI runs the same checks.
+Try the CLI:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm typecheck
+pnpm dev --help
+pnpm dev run "explain this repository" --repo .
+pnpm build
+node dist/cli.js run "hello" --repo .
+```
+
+Commander handles commands, options, missing arguments, help, and version output.
+TypeScript checks and compiles the source. tsx runs it during development.
+The source is in src/cli.ts; compiled output goes to dist/cli.js.
+Agent logic will be separate from the terminal interface when introduced.
+
+## How to commit
+
+Keep each commit focused. Review your changes, stage the intended files, then
+write a message using `type(optional-scope): short description`:
+
+```bash
+git diff
+git add README.md
+git diff --cached
+git commit -m "docs: explain development setup"
+```
+
+Use `feat` for features, `fix` for bugs, `docs` for documentation, `test` for
+tests, and `chore` for tooling. Husky runs `pnpm check` before a commit and
+commitlint checks the message. If a check fails, fix the reported issue and
+retry. `pnpm lint:fix` applies formatting and safe lint fixes; review and stage
+those changes before retrying. Commit from a WSL terminal with Node/pnpm available.
+
+## Architecture decisions
+
+- [Harness ownership and model transport](docs/adr/0001-harness-ownership.md)
+- [Execution trust, supported hosts, snapshot and apply](docs/adr/0002-execution-trust-boundary.md)
+- [Tooling, tests, and checkpoints](docs/adr/0003-foundation-tooling.md)
+
+The foundation does not execute repository commands or call a model yet.
+The next story, CH-002, adds a deterministic fake model/tool exchange.
