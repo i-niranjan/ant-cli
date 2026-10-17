@@ -2,8 +2,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Command } from "commander";
 import { runAgent } from "./core/run.js";
+import type { ModelClient } from "./model/client.js";
 import { additionScenario } from "./model/scenarios.js";
 import { ScriptedModel } from "./model/scripted.js";
+import { selectModel } from "./model/select.js";
 import type { Event } from "./protocol/contracts.js";
 import { addNumbers } from "./tools/add-numbers.js";
 
@@ -31,12 +33,29 @@ program
 
 program
   .command("demo")
-  .description("Replay a scripted model/tool exchange (no API call)")
+  .description(
+    "Run the add_numbers exchange (scripted by default; --model calls a real API)",
+  )
   .option("--jsonl", "Print raw events as JSON lines")
-  .action(async (options: { jsonl?: boolean }) => {
+  .option(
+    "--model <provider/id>",
+    "Use a real model, e.g. anthropic/claude-haiku-5-5",
+  )
+  .action(async (options: { jsonl?: boolean; model?: string }) => {
+    const model = ((): ModelClient => {
+      try {
+        return options.model
+          ? selectModel(options.model, process.env)
+          : new ScriptedModel(additionScenario());
+      } catch (error) {
+        return program.error(`error: ${(error as Error).message}`, {
+          exitCode: 2,
+        });
+      }
+    })();
     const result = await runAgent({
-      task: "What is 2 + 3?",
-      model: new ScriptedModel(additionScenario()),
+      task: "What is 2 + 3? Use the add_numbers tool, then answer in one short sentence.",
+      model,
       tools: [addNumbers],
       events: {
         emit: (event) =>
@@ -52,8 +71,13 @@ function describeEvent(event: Event): string {
   const prefix = `${String(event.sequence).padStart(2)} ${event.type}`;
   switch (event.type) {
     case "run_finished": {
-      const { state, text, toolCalls, usage } = event.payload.result;
-      return `${prefix}  ${state}: "${text}" (${toolCalls} tool call, ${usage.modelRequests} model requests, ${usage.inputTokens}/${usage.outputTokens} tokens in/out)`;
+      const { state, reason, text, toolCalls, usage } = event.payload.result;
+      const cost =
+        usage.unpricedRequests > 0
+          ? `cost unknown for ${usage.unpricedRequests} of ${usage.modelRequests} requests`
+          : `$${usage.costUsd.toFixed(6)}`;
+      const outcome = reason ? `${state} (${reason})` : state;
+      return `${prefix}  ${outcome}: "${text}" (${toolCalls} tool call, ${usage.modelRequests} model requests, ${usage.inputTokens}/${usage.outputTokens} tokens in/out, ${cost})`;
     }
     default:
       return `${prefix}  ${JSON.stringify(event.payload)}`;

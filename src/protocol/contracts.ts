@@ -55,22 +55,26 @@ export const StopReason = z.enum([
 export type StopReason = z.infer<typeof StopReason>;
 
 // Token counts for one model response. Absent means the provider did not
-// report usage; it must never be treated as zero.
+// report usage; it must never be treated as zero. Likewise an absent costUsd
+// means the price is unknown, not free.
 export const Usage = z.strictObject({
   inputTokens: count,
   outputTokens: count,
   cacheReadTokens: count.optional(),
   cacheWriteTokens: count.optional(),
+  costUsd: z.number().nonnegative().optional(),
 });
 export type Usage = z.infer<typeof Usage>;
 
-// Totals across a run. Tokens sum reported responses only; unreportedRequests
-// says how many responses had unknown usage.
+// Totals across a run. Tokens and cost sum known values only;
+// unreportedRequests and unpricedRequests count the responses left out.
 export const UsageTotals = z.strictObject({
   modelRequests: count,
   unreportedRequests: count,
+  unpricedRequests: count,
   inputTokens: count,
   outputTokens: count,
+  costUsd: z.number().nonnegative(),
 });
 export type UsageTotals = z.infer<typeof UsageTotals>;
 

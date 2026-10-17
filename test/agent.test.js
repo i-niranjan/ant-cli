@@ -104,8 +104,10 @@ test("scripted model streams text, completes a tool round-trip, and ends once", 
   assert.deepEqual(result.usage, {
     modelRequests: 2,
     unreportedRequests: 0,
+    unpricedRequests: 2,
     inputTokens: 30,
     outputTokens: 9,
+    costUsd: 0,
   });
   assertSingleTerminal(events, result);
 
@@ -290,8 +292,10 @@ test("missing usage is reported as unknown, not zero", async () => {
   assert.deepEqual(result.usage, {
     modelRequests: 1,
     unreportedRequests: 1,
+    unpricedRequests: 1,
     inputTokens: 0,
     outputTokens: 0,
+    costUsd: 0,
   });
   const completed = events.find((e) => e.type === "model_response_completed");
   assert.equal("usage" in completed.payload, false);
@@ -348,12 +352,17 @@ test("versioned records reject other schema versions", async () => {
   );
 });
 
-test("public contracts contain no Pi-native types", () => {
-  const dirs = ["src/protocol", "src/model", "src/core", "src/tools"];
-  for (const dir of dirs) {
-    for (const file of readdirSync(new URL(dir, root))) {
-      const source = readFileSync(new URL(`${dir}/${file}`, root), "utf8");
-      assert.doesNotMatch(source, /pi-ai|earendil/i, `${dir}/${file}`);
+test("only the Pi adapter references Pi", () => {
+  const files = readdirSync(new URL("src", root), { recursive: true })
+    .filter((f) => f.endsWith(".ts"))
+    .map((f) => f.replaceAll("\\", "/"));
+  assert.ok(files.includes("protocol/contracts.ts"));
+  for (const file of files) {
+    const source = readFileSync(new URL(`src/${file}`, root), "utf8");
+    if (file === "model/pi.ts") {
+      assert.match(source, /@earendil-works\/pi-ai/);
+    } else {
+      assert.doesNotMatch(source, /pi-ai|earendil/i, file);
     }
   }
 });

@@ -109,8 +109,10 @@ export async function runAgent(options: RunOptions): Promise<FinalResult> {
   const usage: UsageTotals = {
     modelRequests: 0,
     unreportedRequests: 0,
+    unpricedRequests: 0,
     inputTokens: 0,
     outputTokens: 0,
+    costUsd: 0,
   };
   let toolCalls = 0;
   let invalidToolCalls = 0;
@@ -162,6 +164,8 @@ export async function runAgent(options: RunOptions): Promise<FinalResult> {
       } else {
         usage.unreportedRequests++;
       }
+      if (response.usage?.costUsd === undefined) usage.unpricedRequests++;
+      else usage.costUsd += response.usage.costUsd;
       emit({
         type: "model_response_completed",
         payload: {

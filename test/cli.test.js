@@ -67,7 +67,10 @@ test("demo replays the scripted exchange and prints valid events", () => {
   const readable = run(["demo"]);
   assert.equal(readable.status, 0);
   assert.match(readable.stdout, /tool_result .*"content":"5"/);
-  assert.match(readable.stdout, /run_finished {2}answered: "2 \+ 3 = 5\."/);
+  assert.match(
+    readable.stdout,
+    /run_finished {2}answered: "2 \+ 3 = 5\." .*cost unknown for 2 of 2 requests/,
+  );
 
   const jsonl = run(["demo", "--jsonl"]);
   assert.equal(jsonl.status, 0);
@@ -78,4 +81,28 @@ test("demo replays the scripted exchange and prints valid events", () => {
   assert.equal(events[0].type, "run_started");
   assert.equal(events.at(-1).type, "run_finished");
   assert.equal(events.at(-1).payload.result.state, "answered");
+});
+
+test("real models need an explicit harness key and exact provider/model", () => {
+  const env = { ...process.env, ANTHROPIC_API_KEY: "sk-ant-ambient" };
+  delete env.ANT_AGENT_ANTHROPIC_API_KEY;
+  for (const [args, message] of [
+    [
+      ["demo", "--model", "anthropic/claude-haiku-5-5"],
+      /set ANT_AGENT_ANTHROPIC_API_KEY/,
+    ],
+    [["demo", "--model", "openai/gpt-5"], /unsupported model/],
+    [["demo", "--model", "claude-haiku-5-5"], /unsupported model/],
+  ]) {
+    const result = spawnSync(process.execPath, ["dist/cli.js", ...args], {
+      cwd: root,
+      encoding: "utf8",
+      env,
+      timeout: 10_000,
+    });
+    assert.equal(result.status, 2);
+    assert.match(result.stderr, message);
+    assert.equal(result.stdout, "");
+    assert.doesNotMatch(result.stderr, /sk-ant-ambient/);
+  }
 });

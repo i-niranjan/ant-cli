@@ -1,2 +1,5 @@
 allowBuilds:
   esbuild: true
+  # Pulled in by pi-ai for providers we do not use; their install scripts stay off.
+  "@google/genai": false
+  protobufjs: false
