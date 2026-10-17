@@ -50,7 +50,11 @@ git commit -m "docs: explain development setup"
 
 Use `feat` for features, `fix` for bugs, `docs` for documentation, `test` for
 tests, and `chore` for tooling. Husky runs `pnpm check` before a commit and
-commitlint checks the message. If a check fails, fix the reported issue and
+commitlint checks the message. Before a push, Husky runs `pnpm preflight`: it
+checks out each pushed commit into a clean temporary worktree, verifies the
+Node/pnpm pins, installs with the frozen lockfile, and runs `pnpm check`, the
+same steps as CI. Uncommitted or unstaged files cannot hide a CI failure.
+Run `pnpm preflight` yourself at any time. If a check fails, fix the reported issue and
 retry. `pnpm lint:fix` applies formatting and safe lint fixes; review and stage
 those changes before retrying. Commit from a WSL or macOS terminal with Node/pnpm available.
 

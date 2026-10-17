@@ -1,0 +1,7 @@
+# Run the CI checks on every commit being pushed; skip branch deletions.
+zero=0000000000000000000000000000000000000000
+revs=""
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
+  [ "$local_sha" = "$zero" ] || revs="$revs $local_sha"
+done
+[ -z "$revs" ] || bash scripts/preflight.sh $revs
