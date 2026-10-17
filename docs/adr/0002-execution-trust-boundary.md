@@ -24,5 +24,6 @@ Export a patch and manifest; a future explicit apply command checks the baseline
 and refuses stale/conflicting changes. In-place autonomous execution is deferred.
 
 Linux and Windows through WSL2 are the initial host targets. Foundation checks
-currently run in Ubuntu/WSL; Docker execution is future CH-010/CH-011 work.
+run in Ubuntu/WSL and Linux CI; macOS is accepted as a development host
+(2026-10-17). Docker execution is future CH-010/CH-011 work.
 Native Windows and macOS support require compatibility evidence before release.

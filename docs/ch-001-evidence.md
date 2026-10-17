@@ -17,11 +17,19 @@ Verified on 2026-10-15 in Ubuntu-22.04 through WSL2.
   internals, environment files, and agent session/artifact directories.
 - Three ADRs record ownership, execution trust, supported hosts, and tooling.
 - A GitHub Actions workflow runs the frozen install and same checks on Linux.
-  Hosted CI has not run; this repository has not been published.
 
-Initial commit and clean committed-clone verification await the user's Git
-author name and email. CH-001 remains in progress until that evidence is recorded.
-H0 also requires CH-002 through CH-005; no model or Docker executor exists yet.
+## Committed-clone verification
 
-Commander resolves in command-line TypeScript and CLI execution. VS Code runs
-inside WSL, but the visible editor diagnostic still needs user confirmation.
+Verified on 2026-10-17 on macOS (Apple Silicon, arm64), commit
+`d2fd150d02e58f8e0afbd6294e62044b572a9bb8`.
+
+- A fresh `git clone` of the commit, with Node 22.22.0 selected from `.nvmrc`
+  and pnpm 12.11.2, installed with `pnpm install --frozen-lockfile`.
+- `pnpm check` passed: lint, typecheck, build, and 5/5 CLI smoke tests.
+- `node dist/cli.js run "hello" --repo .` printed the task and resolved
+  repository and exited 0. `--version` printed 1.0.0. A missing task exited 1.
+- Hosted CI "Foundation checks" passed on ubuntu-22.04 for the same commit:
+  https://github.com/i-niranjan/ant-cli/actions/runs/39029708818
+
+CH-001 is complete. H0 still requires CH-002 through CH-005; no model or
+Docker executor exists yet.

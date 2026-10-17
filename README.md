@@ -4,8 +4,9 @@ First CLI slice for the Ant Swarm coding harness. The run command currently
 prints the task and resolves its repository path. It does not call a model,
 modify files, or verify that the repository path exists yet.
 
-Develop in Linux or Ubuntu/WSL2 with Node 22.22.0 and pnpm 12.11.2.
-Native Windows and macOS support have not been verified.
+Develop in Linux, Ubuntu/WSL2, or macOS with Node 22.22.0 and pnpm 12.11.2.
+Foundation checks pass on macOS; Linux CI is the authority. Native Windows is
+not supported, and macOS is a development host only, not a release target yet.
 
 From a checkout, activate the pinned tools and install dependencies:
 
@@ -51,7 +52,7 @@ Use `feat` for features, `fix` for bugs, `docs` for documentation, `test` for
 tests, and `chore` for tooling. Husky runs `pnpm check` before a commit and
 commitlint checks the message. If a check fails, fix the reported issue and
 retry. `pnpm lint:fix` applies formatting and safe lint fixes; review and stage
-those changes before retrying. Commit from a WSL terminal with Node/pnpm available.
+those changes before retrying. Commit from a WSL or macOS terminal with Node/pnpm available.
 
 ## Architecture decisions
 
